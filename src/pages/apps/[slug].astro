@@ -1,0 +1,182 @@
+---
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import '../../styles/global.css';
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { profile, projects } from '../../data/content';
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug } }));
+}
+const { slug } = Astro.params;
+const app = projects.find((p) => p.slug === slug)!;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Real screenshots: drop files into public/shots/<slug>/ and they replace the concept screens.
+const dir = join(process.cwd(), 'public', 'shots', app.slug);
+const shots = existsSync(dir) ? readdirSync(dir).filter((f) => /\.(png|jpe?g|webp)$/i.test(f)).sort() : [];
+const concept = ['Library', 'Script editor', 'Panel queue'];
+const channels = [
+  ['overview', 'overview'],
+  ['screenshots', 'screenshots'],
+  ['features', 'features'],
+  ['changelog', 'changelog'],
+  ['roadmap', 'roadmap'],
+  ['requirements', 'requirements'],
+  ['download', 'download'],
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{app.name} — {profile.name}</title>
+    <meta name="description" content={app.summary} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+  </head>
+  <body>
+    <a class="skip" href="#feed">Skip to content</a>
+    <div class="window">
+      <div class="titlebar" role="presentation">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="title mono">{app.name} — App page</span>
+        <a class="back mono" href={`${base}/#projects`}>← All apps</a>
+      </div>
+
+      <div class="dc">
+        <nav class="rail" aria-label="Apps">
+          <a href={`${base}/`} data-tip="Home" aria-label="Home">⌂</a>
+          <i aria-hidden="true"></i>
+          {projects.map((p) => <a class={p.slug === app.slug ? 'on' : ''} href={`${base}/apps/${p.slug}/`} data-tip={p.name} aria-label={p.name}>{p.glyph}</a>)}
+        </nav>
+
+        <aside class="chan" aria-label="Channels">
+          <h2><span class="glyph mono" aria-hidden="true">{app.glyph}</span>{app.name}</h2>
+          <div class="cat">Info</div>
+          {channels.slice(0, 3).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
+          <div class="cat">Releases</div>
+          {channels.slice(3, 5).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
+          <div class="cat">Get it</div>
+          {channels.slice(5).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
+        </aside>
+
+        <main id="feed" class="feed">
+          <div class="hdr mono"><b>#</b><span data-cur>overview</span><span class="sp"></span><span class={`status s-${app.status.replace(' ', '-').toLowerCase()}`}>{app.status}</span></div>
+
+          <section id="overview">
+            <div class="banner">
+              <p class="eyebrow mono">{profile.role}</p>
+              <h1>{app.name}</h1>
+              <p>{app.summary}</p>
+              {app.pipeline && <ol class="pipe mono" style="margin-top:16px">{app.pipeline.map((s) => <li>{s}</li>)}</ol>}
+              <div class="cta">
+                <span class="price"><small>Price</small>Free</span>
+                <span class="btn off" aria-disabled="true">Download · coming with M5</span>
+                {app.repo && <a class="btn ghost" href={app.repo} rel="noopener">Source on GitHub</a>}
+              </div>
+            </div>
+          </section>
+
+          <section id="screenshots">
+            <h2 class="label mono"># screenshots</h2>
+            {shots.length ? (
+              <div class="gal">{shots.map((f, i) => <figure><img src={`${base}/shots/${app.slug}/${f}`} alt={`${app.name} screenshot ${i + 1}`} loading="lazy" /></figure>)}</div>
+            ) : (<>
+              <div class="gal">
+                {concept.map((c, i) => (
+                  <figure aria-label={`${c} concept screen`}>
+                    <div class="scr" aria-hidden="true">
+                      <div class="sb">{[0, 1, 2, 3, 4].map((k) => <i class={k === i + 1 ? 'on' : ''}></i>)}</div>
+                      <div class="mn">{i === 1 ? <div class="ln"><i class="k"></i><i></i><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i></div> : <div class="pn">{Array.from({ length: i === 0 ? 6 : 3 }).map(() => <i></i>)}</div>}</div>
+                    </div>
+                    <figcaption>{c}</figcaption>
+                  </figure>
+                ))}
+              </div>
+              <p class="note">Concept screens from the design docs. Real screenshots appear here once they are added to <code>public/shots/{app.slug}/</code>.</p>
+            </>)}
+          </section>
+
+          <section id="features">
+            <h2 class="label mono"># features</h2>
+            <ul class="feats">{app.features.map((f) => <li>{f}</li>)}</ul>
+            <ul class="chips" style="margin-top:20px" aria-label="Tech">{app.stack.map((x) => <li class="mono">{x}</li>)}</ul>
+          </section>
+
+          <section id="changelog">
+            <h2 class="label mono"># changelog</h2>
+            <ol class="log">
+              {app.releases.map((r) => (
+                <li>
+                  <div class="h"><b>v{r.version}</b><time>{r.date}</time></div>
+                  <h3>{r.title}</h3>
+                  <ul>{r.notes.map((n) => <li>{n}</li>)}</ul>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section id="roadmap">
+            <h2 class="label mono"># roadmap</h2>
+            <div class="road">
+              {app.roadmap.map((m) => (
+                <div><b>{m.id}</b><div><h3>{m.title}</h3><ul>{m.items.map((i) => <li>{i}</li>)}</ul></div></div>
+              ))}
+            </div>
+          </section>
+
+          <section id="requirements">
+            <h2 class="label mono"># requirements</h2>
+            <div class="req">
+              <div><h3>Operating system</h3><ul>{app.requirements.os.map((r) => <li>{r}</li>)}</ul></div>
+              <div><h3>Hardware</h3><ul>{app.requirements.hardware.map((r) => <li>{r}</li>)}</ul></div>
+              <div><h3>Also needed</h3><ul>{app.requirements.software.map((r) => <li>{r}</li>)}</ul></div>
+            </div>
+          </section>
+
+          <section id="download">
+            <h2 class="label mono"># download</h2>
+            <p style="color:var(--dim);max-width:60ch">{app.name} is still in {app.status.toLowerCase()}. Signed builds for {app.platforms.join(', ')} arrive with milestone M5. Follow the repository for releases.</p>
+            <div class="cta" style="margin-top:16px">
+              {app.platforms.map((p) => <span class="btn ghost off">{p} · soon</span>)}
+              {app.repo && <a class="btn" href={app.repo} rel="noopener">Follow on GitHub →</a>}
+            </div>
+          </section>
+        </main>
+
+        <aside class="info" aria-label="App details">
+          <h2>About</h2>
+          <dl>
+            <div><dt>Status</dt><dd>{app.status}</dd></div>
+            <div><dt>Version</dt><dd>{app.version}</dd></div>
+            <div><dt>Started</dt><dd>{app.released}</dd></div>
+            <div><dt>Updated</dt><dd>{app.updated}</dd></div>
+            <div><dt>License</dt><dd>{app.license}</dd></div>
+            <div><dt>Developer</dt><dd><a href={profile.github} rel="noopener" style="color:var(--accent-ink)">{profile.nick}</a></dd></div>
+          </dl>
+          <ul class="chips os" aria-label="Platforms">{app.platforms.map((x) => <li class="mono">{x}</li>)}</ul>
+        </aside>
+      </div>
+
+      <footer class="statusbar mono">
+        <span><i class="dot" aria-hidden="true"></i> Local-first</span>
+        <span>Tauri · Rust · TypeScript</span>
+        <span class="hide-sm">{profile.location}</span>
+      </footer>
+    </div>
+
+    <script>
+      const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-ch]')];
+      const cur = document.querySelector<HTMLElement>('[data-cur]')!;
+      const io = new IntersectionObserver((es) => {
+        for (const e of es) if (e.isIntersecting) {
+          links.forEach((l) => l.toggleAttribute('aria-current', l.dataset.ch === e.target.id));
+          cur.textContent = e.target.id;
+        }
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      links.forEach((l) => { const s = document.getElementById(l.dataset.ch!); if (s) io.observe(s); });
+    </script>
+  </body>
+</html>

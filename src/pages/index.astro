@@ -1,6 +1,6 @@
 ---
-import '@fontsource-variable/ibm-plex-sans';
-import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 import '../styles/global.css';
 import { profile, projects, skills } from '../data/content';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -65,7 +65,6 @@ const nav = [
                       <h3>{p.name}</h3>
                       <span class={`status mono s-${p.status.replace(' ', '-').toLowerCase()}`}>{p.status}</span>
                     </div>
-                    {p.placeholder && <span class="ph mono">PLACEHOLDER</span>}
                   </header>
                   <p>{p.summary}</p>
                   {p.pipeline && (
@@ -75,12 +74,10 @@ const nav = [
                   )}
                   <ul class="chips os" aria-label="Platforms">{p.platforms.map((x) => <li class="mono">{x}</li>)}</ul>
                   <ul class="chips" aria-label="Tech">{p.stack.map((x) => <li class="mono">{x}</li>)}</ul>
-                  {(p.repo || p.download) && (
-                    <div class="links mono">
-                      {p.repo && <a href={p.repo} rel="noopener">Source →</a>}
-                      {p.download && <a href={p.download} rel="noopener">Download →</a>}
-                    </div>
-                  )}
+                  <div class="links mono">
+                    <a class="btn" href={`${base}/apps/${p.slug}/`}>View app page →</a>
+                    {p.repo && <a href={p.repo} rel="noopener">Source →</a>}
+                  </div>
                 </article>
               ))}
             </div>
