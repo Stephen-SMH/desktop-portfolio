@@ -1,9 +1,15 @@
 ---
-import '@fontsource-variable/geist';
-import '@fontsource-variable/geist-mono';
+import '@fontsource-variable/ibm-plex-sans';
+import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import { profile, projects, skills } from '../data/content';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const nav = [
+  { id: 'about', label: 'About' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'stack', label: 'Stack' },
+  { id: 'contact', label: 'Contact' },
+];
 ---
 <!doctype html>
 <html lang="en">
@@ -15,58 +21,108 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
   </head>
   <body>
-    <header class="bar wrap">
-      <a class="mono" href={profile.hub}>← stephen-smh.github.io</a>
-      <nav class="mono"><a href="#projects">Projects</a><a href="#stack">Stack</a><a href="#contact">Contact</a></nav>
-    </header>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="window">
+      <div class="titlebar" role="presentation">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="title mono">{profile.name} — Desktop Software</span>
+        <a class="back mono" href={profile.hub}>← Home</a>
+      </div>
 
-    <main class="wrap">
-      <section class="hero">
-        <p class="mono eyebrow">{profile.role} · {profile.location}</p>
-        <h1>{profile.name}<span> / {profile.nick}</span></h1>
-        <p class="lede">{profile.tagline}</p>
-        <p class="sub">{profile.statement}</p>
-      </section>
-
-      <section id="projects">
-        <h2 class="mono label">Projects</h2>
-        <div class="grid">
-          {projects.map((p) => (
-            <article class="card">
-              <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i></div>
-              <div class="body">
-                <h3>{p.name}</h3>
-                <p>{p.summary}</p>
-                <ul class="chips plat">{p.platforms.map((x) => <li class="mono">{x}</li>)}</ul>
-                <ul class="chips">{p.stack.map((x) => <li class="mono">{x}</li>)}</ul>
-                <div class="links mono">
-                  {p.repo && <a href={p.repo} rel="noopener">Source →</a>}
-                  {p.download && <a href={p.download} rel="noopener">Download →</a>}
-                  {p.placeholder && <span class="ph">PLACEHOLDER</span>}
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section id="stack">
-        <h2 class="mono label">Stack</h2>
-        <div class="stack">
-          {skills.map((s) => (
+      <div class="shell">
+        <aside class="sidebar">
+          <div class="brand">
+            <img src={`${base}/portrait.jpg`} alt="" width="40" height="40" />
             <div>
-              <h3 class="mono">{s.group}</h3>
-              <ul class="chips">{s.items.map((i) => <li class="mono">{i}</li>)}</ul>
+              <strong>{profile.name}</strong>
+              <span class="mono">{profile.nick}</span>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+          <nav aria-label="Sections">
+            {nav.map((n) => <a href={`#${n.id}`} data-nav={n.id}>{n.label}</a>)}
+          </nav>
+          <p class="mono side-foot">{profile.location}</p>
+        </aside>
 
-      <section id="contact">
-        <h2 class="mono label">Contact</h2>
-        <a class="mail" href={`mailto:${profile.email}`}>{profile.email}</a>
-        <p class="mono links"><a href={profile.github} rel="noopener">GitHub</a></p>
-      </section>
-    </main>
+        <main id="main">
+          <section id="about" class="hero">
+            <p class="eyebrow mono">{profile.role}</p>
+            <h1>{profile.tagline}</h1>
+            <p class="lede">{profile.statement}</p>
+            <ul class="chips os" aria-label="Target platforms">
+              <li class="mono">macOS</li><li class="mono">Windows</li><li class="mono">Linux</li>
+            </ul>
+          </section>
+
+          <section id="projects">
+            <h2 class="label mono">Projects</h2>
+            <div class="apps">
+              {projects.map((p, i) => (
+                <article class={`app ${i === 0 ? 'featured' : ''}`} style={`--i:${i}`}>
+                  <header>
+                    <span class="glyph mono" aria-hidden="true">{p.glyph}</span>
+                    <div class="head">
+                      <h3>{p.name}</h3>
+                      <span class={`status mono s-${p.status.replace(' ', '-').toLowerCase()}`}>{p.status}</span>
+                    </div>
+                    {p.placeholder && <span class="ph mono">PLACEHOLDER</span>}
+                  </header>
+                  <p>{p.summary}</p>
+                  {p.pipeline && (
+                    <ol class="pipe mono" aria-label="Workflow">
+                      {p.pipeline.map((s) => <li>{s}</li>)}
+                    </ol>
+                  )}
+                  <ul class="chips os" aria-label="Platforms">{p.platforms.map((x) => <li class="mono">{x}</li>)}</ul>
+                  <ul class="chips" aria-label="Tech">{p.stack.map((x) => <li class="mono">{x}</li>)}</ul>
+                  {(p.repo || p.download) && (
+                    <div class="links mono">
+                      {p.repo && <a href={p.repo} rel="noopener">Source →</a>}
+                      {p.download && <a href={p.download} rel="noopener">Download →</a>}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="stack">
+            <h2 class="label mono">Stack</h2>
+            <dl class="specs">
+              {skills.map((s) => (
+                <div>
+                  <dt class="mono">{s.group}</dt>
+                  <dd><ul class="chips">{s.items.map((i) => <li class="mono">{i}</li>)}</ul></dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <section id="contact">
+            <h2 class="label mono">Contact</h2>
+            <a class="mail" href={`mailto:${profile.email}`}>{profile.email}</a>
+            <p class="links mono"><a href={profile.github} rel="noopener">GitHub →</a><a href={profile.hub}>All portfolios →</a></p>
+          </section>
+        </main>
+      </div>
+
+      <footer class="statusbar mono">
+        <span><i class="dot" aria-hidden="true"></i> Local-first</span>
+        <span>Tauri · Rust · TypeScript</span>
+        <span class="hide-sm">UTC+7</span>
+      </footer>
+    </div>
+
+    <script>
+      const links = document.querySelectorAll<HTMLAnchorElement>('[data-nav]');
+      const secs = [...links].map((l) => document.getElementById(l.dataset.nav!)).filter(Boolean) as HTMLElement[];
+      const io = new IntersectionObserver((es) => {
+        for (const e of es) if (e.isIntersecting) {
+          links.forEach((l) => l.toggleAttribute('aria-current', l.dataset.nav === e.target.id));
+          links.forEach((l) => { if (l.dataset.nav === e.target.id) l.setAttribute('aria-current', 'true'); });
+        }
+      }, { rootMargin: '-35% 0px -55% 0px' });
+      secs.forEach((s) => io.observe(s));
+    </script>
   </body>
 </html>
