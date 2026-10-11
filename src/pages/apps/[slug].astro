@@ -73,7 +73,7 @@ const channels = [
               {app.pipeline && <ol class="pipe mono" style="margin-top:16px">{app.pipeline.map((s) => <li>{s}</li>)}</ol>}
               <div class="cta">
                 <span class="price"><small>Price</small>Free</span>
-                <span class="btn off" aria-disabled="true">Download · coming with M5</span>
+                <span class="btn off" aria-disabled="true">Download · coming with {app.roadmap.at(-1)?.id}</span>
                 {app.repo && <a class="btn ghost" href={app.repo} rel="noopener">Source on GitHub</a>}
               </div>
             </div>
