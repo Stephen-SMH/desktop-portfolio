@@ -79,6 +79,46 @@ export const projects: App[] = [
       { id: 'M5', title: 'Polish and release', items: ['Signed and notarised builds with auto-update', 'Accessibility pass and keyboard shortcuts', 'Onboarding, empty states and fix-it errors'] },
     ],
   },
+  {
+    slug: 'gitdesk',
+    name: 'GitDesk',
+    glyph: 'G',
+    summary:
+      'A lightweight desktop git client in the spirit of GitHub Desktop. Review changes with a proper diff, pick exactly which files go into a commit, browse history, switch branches and sync with your remote. Under 5 MB, with a Rust core that drives your own git.',
+    status: 'In progress',
+    platforms: ['macOS', 'Windows', 'Linux'],
+    stack: ['Tauri 2', 'Rust', 'React', 'TypeScript', 'Vite', 'git CLI'],
+    pipeline: ['Changes', 'Diff', 'Commit', 'History', 'Push'],
+    repo: 'https://github.com/Stephen-SMH/gitdesk',
+    version: '0.1.0',
+    released: 'Oct 11, 2026',
+    updated: 'Oct 11, 2026',
+    license: 'MIT',
+    size: '4.4 MB',
+    features: [
+      'Changes view with per-file checkboxes: commit exactly the files you pick and leave the rest alone.',
+      'Side-by-side line numbers and coloured hunks in the diff view, for working-tree and historical changes.',
+      'History with commit details and per-file diffs, loaded 100 commits at a time.',
+      'Branch picker with filter, create-from-current and one-click checkout of remote branches.',
+      'Fetch, pull, push and publish from a single toolbar button that shows ahead and behind counts.',
+      'Clone by URL, add an existing folder, or create a new repository. Your keychain and SSH agent handle auth.',
+      'Opens straight into a repository from the command line: gitdesk ~/code/project.',
+    ],
+    requirements: {
+      os: ['macOS 11+', 'Windows 10 / 11 (WebView2)', 'Ubuntu 22.04+ (WebKitGTK)'],
+      hardware: ['Any machine that runs git', 'Around 100 MB of RAM with a repository open'],
+      software: ['git 2.23 or newer on PATH'],
+    },
+    releases: [
+      { version: '0.1.0', date: 'Oct 11, 2026', title: 'First working client', notes: ['Changes, diff, commit, discard, history, branches, fetch/pull/push and clone.', 'Rust git layer covered by integration tests against real repositories.', 'Light and dark themes that follow the system.'] },
+    ],
+    roadmap: [
+      { id: 'M1', title: 'Finer-grained commits', items: ['Stage individual hunks and lines', 'Stash and restore work in progress', 'Amend the last commit'] },
+      { id: 'M2', title: 'Merging and conflicts', items: ['Merge a branch into the current one', 'Conflict list with ours/theirs resolution', 'Cherry-pick and revert from history'] },
+      { id: 'M3', title: 'GitHub integration', items: ['Sign in with the device flow', 'List and open pull requests', 'Create a pull request from the current branch'] },
+      { id: 'M4', title: 'Release', items: ['Signed and notarised builds with auto-update', 'CI builds for Windows and Linux', 'Keyboard shortcuts and an accessibility pass'] },
+    ],
+  },
 ];
 
 export const skills = [

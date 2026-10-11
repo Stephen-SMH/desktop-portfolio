@@ -138,7 +138,7 @@ const channels = [
 
           <section id="download">
             <h2 class="label mono"># download</h2>
-            <p style="color:var(--dim);max-width:60ch">{app.name} is still in {app.status.toLowerCase()}. Signed builds for {app.platforms.join(', ')} arrive with milestone M5. Follow the repository for releases.</p>
+            <p style="color:var(--dim);max-width:60ch">{app.name} is still {app.status === 'Planning' ? 'in planning' : 'in progress'}. Signed builds for {app.platforms.join(', ')} arrive with milestone {app.roadmap.at(-1)?.id}. Follow the repository for releases{app.status === 'In progress' ? ', or build it from source today' : ''}.</p>
             <div class="cta" style="margin-top:16px">
               {app.platforms.map((p) => <span class="btn ghost off">{p} · soon</span>)}
               {app.repo && <a class="btn" href={app.repo} rel="noopener">Follow on GitHub →</a>}

@@ -59,9 +59,9 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
     </header>
 
     <nav class="dicons" aria-label="Desktop">
-      <a class="dicon" style="--i:0" href={`${base}/apps/${app.slug}/`}><span class="tile t-app">{app.glyph}</span>{app.name}</a>
-      <a class="dicon" style="--i:1" href={profile.github} rel="noopener"><span class="tile t-gh"><svg viewBox="0 0 24 24"><path d={I.gh} /></svg></span>GitHub</a>
-      <a class="dicon" style="--i:2" href={profile.hub}><span class="tile t-about"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10" /></svg></span>All portfolios</a>
+      {projects.map((p, i) => <a class="dicon" style={`--i:${i}`} href={`${base}/apps/${p.slug}/`}><span class="tile t-app">{p.glyph}</span>{p.name}</a>)}
+      <a class="dicon" style={`--i:${projects.length}`} href={profile.github} rel="noopener"><span class="tile t-gh"><svg viewBox="0 0 24 24"><path d={I.gh} /></svg></span>GitHub</a>
+      <a class="dicon" style={`--i:${projects.length + 1}`} href={profile.hub}><span class="tile t-about"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10" /></svg></span>All portfolios</a>
     </nav>
 
     <main class="stage" id="stage">
@@ -83,7 +83,7 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
         <div class="body" style="overflow:hidden"><div class="term" data-term={payload}>
           <div class="tlog" id="tlog" data-lenis-prevent role="log" aria-live="polite"></div>
           <form class="tform" id="tform" autocomplete="off"><label class="sr" for="tin">Terminal command</label><span class="tps">stephen<i>@</i>desktop <u>~</u> $</span><input class="tin" id="tin" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" /><span class="tghost" id="tghost" aria-hidden="true"></span></form>
-          <div class="tchips">{['help', 'whoami', 'about', 'apps', 'stack', 'contact', 'open comic-studio', 'clear'].map((c) => <button type="button" class="tchip" data-cmd={c}>{c}</button>)}</div>
+          <div class="tchips">{['help', 'whoami', 'about', 'apps', 'stack', 'contact', 'open comic-studio', 'open gitdesk', 'clear'].map((c) => <button type="button" class="tchip" data-cmd={c}>{c}</button>)}</div>
         </div></div>
       </section>
 
@@ -125,7 +125,7 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
     <nav class="dock" id="dock" aria-label="Dock">
       {wins.map((w) => <button class="dk" data-open={w.id} data-tip={w.dock} aria-label={`Open ${w.dock}`}><span class={`tile ${w.cls}`}><svg viewBox="0 0 24 24"><path d={I[w.icon as keyof typeof I]} /></svg></span><i class="dot"></i></button>)}
       <i class="sep" aria-hidden="true"></i>
-      <a class="dk" href={`${base}/apps/${app.slug}/`} data-tip={app.name} aria-label={app.name}><span class="tile t-app">{app.glyph}</span></a>
+      {projects.map((p) => <a class="dk" href={`${base}/apps/${p.slug}/`} data-tip={p.name} aria-label={p.name}><span class="tile t-app">{p.glyph}</span></a>)}
     </nav>
 
     <script>
