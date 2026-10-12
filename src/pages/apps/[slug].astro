@@ -4,6 +4,11 @@ import '@fontsource-variable/geist-mono';
 import '../../styles/global.css';
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import AppIcon from '../../components/AppIcon.astro';
+import ComicStudioStory from '../../components/story/ComicStudioStory.astro';
+import GitDeskStory from '../../components/story/GitDeskStory.astro';
+import LanternStory from '../../components/story/LanternStory.astro';
+import YayMalStory from '../../components/story/YayMalStory.astro';
 import { profile, projects } from '../../data/content';
 
 export function getStaticPaths() {
@@ -17,8 +22,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const dir = join(process.cwd(), 'public', 'shots', app.slug);
 const shots = existsSync(dir) ? readdirSync(dir).filter((f) => /\.(png|jpe?g|webp)$/i.test(f)).sort() : [];
 const concept = ['Library', 'Script editor', 'Panel queue'];
+// each app tells its story in its own visual style; apps without one fall back to plain paragraphs
+const stories: Record<string, any> = { gitdesk: GitDeskStory, lantern: LanternStory, yaymal: YayMalStory, 'comic-studio': ComicStudioStory };
+const Story = stories[app.slug];
 const channels = [
   ['overview', 'overview'],
+  ['story', 'story'],
   ['screenshots', 'screenshots'],
   ['features', 'features'],
   ['changelog', 'changelog'],
@@ -40,27 +49,27 @@ const channels = [
     <a class="skip" href="#feed">Skip to content</a>
     <div class="window">
       <div class="titlebar" role="presentation">
-        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="dots"><a class="c" href={`${base}/`} data-g="×" aria-label="Close, back to the desktop"></a><button class="n" data-g="−" aria-label="Minimize to the desktop"></button><button class="x" data-g="+" aria-label="Toggle full width"></button></span>
         <span class="title mono">{app.name} — App page</span>
-        <a class="back mono" href={`${base}/#projects`}>← All apps</a>
+        <a class="back mono" href={`${base}/`}>← All apps</a>
       </div>
 
       <div class="dc">
-        <nav class="rail" aria-label="Apps">
+        <nav class="rail" aria-label="Apps"><div class="stick">
           <a href={`${base}/`} data-tip="Home" aria-label="Home">⌂</a>
           <i aria-hidden="true"></i>
-          {projects.map((p) => <a class={p.slug === app.slug ? 'on' : ''} href={`${base}/apps/${p.slug}/`} data-tip={p.name} aria-label={p.name}>{p.glyph}</a>)}
-        </nav>
+          {projects.map((p) => <a class={p.slug === app.slug ? 'on' : ''} style={`--tint:${p.tint}`} href={`${base}/apps/${p.slug}/`} data-tip={p.name} aria-label={p.name}><AppIcon d={p.icon} /></a>)}
+        </div></nav>
 
-        <aside class="chan" aria-label="Channels">
-          <h2><span class="glyph mono" aria-hidden="true">{app.glyph}</span>{app.name}</h2>
+        <aside class="chan" aria-label="Channels"><div class="stick">
+          <h2><span class="glyph" style={`background:${app.tint}`} aria-hidden="true"><AppIcon d={app.icon} /></span>{app.name}</h2>
           <div class="cat">Info</div>
-          {channels.slice(0, 3).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
+          {channels.slice(0, 4).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
           <div class="cat">Releases</div>
-          {channels.slice(3, 5).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
+          {channels.slice(4, 6).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
           <div class="cat">Get it</div>
-          {channels.slice(5).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
-        </aside>
+          {channels.slice(6).map(([id, label]) => <a href={`#${id}`} data-ch={id}><b>#</b>{label}</a>)}
+        </div></aside>
 
         <main id="feed" class="feed">
           <div class="hdr mono"><b>#</b><span data-cur>overview</span><span class="sp"></span><span class={`status s-${app.status.replace(' ', '-').toLowerCase()}`}>{app.status}</span></div>
@@ -77,6 +86,11 @@ const channels = [
                 {app.repo && <a class="btn ghost" href={app.repo} rel="noopener">Source on GitHub</a>}
               </div>
             </div>
+          </section>
+
+          <section id="story">
+            <h2 class="label mono"># story</h2>
+            {Story ? <Story app={app} /> : <div class="story">{app.story.map((p) => <p>{p}</p>)}</div>}
           </section>
 
           <section id="screenshots">
@@ -168,15 +182,27 @@ const channels = [
     </div>
 
     <script>
+      // traffic lights: close and minimize go back to the desktop, the green one toggles full width
+      const win = document.querySelector<HTMLElement>('.window')!;
+      document.querySelector('.dots .n')!.addEventListener('click', () => { win.classList.add('min'); setTimeout(() => (location.href = document.querySelector<HTMLAnchorElement>('.dots .c')!.href), 380); });
+      document.querySelector('.dots .x')!.addEventListener('click', () => document.documentElement.classList.toggle('max'));
+      addEventListener('pageshow', () => win.classList.remove('min'));
       const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-ch]')];
       const cur = document.querySelector<HTMLElement>('[data-cur]')!;
-      const io = new IntersectionObserver((es) => {
-        for (const e of es) if (e.isIntersecting) {
-          links.forEach((l) => l.toggleAttribute('aria-current', l.dataset.ch === e.target.id));
-          cur.textContent = e.target.id;
-        }
-      }, { rootMargin: '-30% 0px -60% 0px' });
-      links.forEach((l) => { const s = document.getElementById(l.dataset.ch!); if (s) io.observe(s); });
+      const secs = links.map((l) => document.getElementById(l.dataset.ch!)!).filter(Boolean);
+      const mark = (id: string) => { links.forEach((l) => l.toggleAttribute('aria-current', l.dataset.ch === id)); cur.textContent = id; };
+      // the section whose top has passed 35% of the viewport; at the very bottom, the last one
+      const spy = () => {
+        if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) return mark(secs.at(-1)!.id);
+        let id = secs[0].id;
+        for (const s of secs) if (s.getBoundingClientRect().top <= innerHeight * 0.35) id = s.id;
+        mark(id);
+      };
+      let pinned = false; let t = 0;
+      addEventListener('scroll', () => { if (!pinned) spy(); clearTimeout(t); t = setTimeout(() => { pinned = false; }, 150); }, { passive: true });
+      // a clicked channel stays selected even if the page cannot scroll it all the way up
+      links.forEach((l) => l.addEventListener('click', () => { pinned = true; mark(l.dataset.ch!); clearTimeout(t); t = setTimeout(() => { pinned = false; }, 1000); }));
+      spy();
     </script>
   </body>
 </html>

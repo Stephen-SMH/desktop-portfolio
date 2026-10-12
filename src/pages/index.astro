@@ -2,21 +2,23 @@
 import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
 import '../styles/os.css';
-import { profile, projects, skills } from '../data/content';
+import AppIcon from '../components/AppIcon.astro';
+import { approach, profile, projects, skills } from '../data/content';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const app = projects[0];
 const I = {
   user: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c.6-4 3.6-6 8-6s7.4 2 8 6',
   term: 'M4 5h16v14H4zM8 10l3 2.5L8 15M13 15h3',
   store: 'M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2',
   set: 'M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M8 14v6',
   mail: 'M3 6h18v12H3zM3 7l9 7 9-7',
+  notes: 'M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h5',
   gh: 'M9 19c-4 1-4-2-6-2m12 4v-3a3 3 0 00-1-2c3 0 6-1 6-6a5 5 0 00-1-3 5 5 0 000-3s-1 0-3 1a10 10 0 00-6 0C7 4 6 4 6 4a5 5 0 000 3 5 5 0 00-1 3c0 5 3 6 6 6a3 3 0 00-1 2v3',
 };
 const wins = [
   { id: 'about', title: 'About Stephen', icon: 'user', cls: 't-about', dock: 'About' },
   { id: 'term', title: 'stephen — -zsh — 80×24', icon: 'term', cls: 't-term', dock: 'Terminal' },
+  { id: 'notes', title: 'Why desktop.md', icon: 'notes', cls: 't-notes', dock: 'Why desktop' },
   { id: 'store', title: 'App Store', icon: 'store', cls: 't-store', dock: 'Apps' },
   { id: 'set', title: 'Settings — Stack', icon: 'set', cls: 't-set', dock: 'Stack' },
   { id: 'mail', title: 'New message', icon: 'mail', cls: 't-mail', dock: 'Contact' },
@@ -24,12 +26,12 @@ const wins = [
 const cmds: Record<string, string[]> = {
   whoami: [`${profile.name} (${profile.nick}) · ${profile.location}`, `${profile.role} · ${profile.tagline}`],
   about: [profile.statement],
+  why: [approach.intro, '', ...approach.principles.map((p) => `• ${p.title}: ${p.body}`)],
   apps: projects.map((p) => `• ${p.name}: ${p.status} · v${p.version}`),
   stack: skills.map((s) => `• ${s.group}: ${s.items.join(', ')}`),
   contact: [`email     ${profile.email}`, `github    ${profile.github.replace('https://', '')}`, `all work  ${profile.hub.replace('https://', '')}`],
 };
 const payload = JSON.stringify({ cmds, apps: projects.map((p) => p.slug), base });
-const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexOf(r.id) === 0 ? 8 : 0);
 ---
 <!doctype html>
 <html lang="en">
@@ -59,9 +61,10 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
     </header>
 
     <nav class="dicons" aria-label="Desktop">
-      {projects.map((p, i) => <a class="dicon" style={`--i:${i}`} href={`${base}/apps/${p.slug}/`}><span class="tile t-app">{p.glyph}</span>{p.name}</a>)}
-      <a class="dicon" style={`--i:${projects.length}`} href={profile.github} rel="noopener"><span class="tile t-gh"><svg viewBox="0 0 24 24"><path d={I.gh} /></svg></span>GitHub</a>
-      <a class="dicon" style={`--i:${projects.length + 1}`} href={profile.hub}><span class="tile t-about"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10" /></svg></span>All portfolios</a>
+      {projects.map((p, i) => <a class="dicon" style={`--i:${i}`} href={`${base}/apps/${p.slug}/`}><span class="tile" style={`background:${p.tint}`}><AppIcon d={p.icon} /></span>{p.name}</a>)}
+      <button class="dicon" style={`--i:${projects.length}`} data-open="notes"><span class="tile t-notes"><svg viewBox="0 0 24 24"><path d={I.notes} /></svg></span>Why desktop.md</button>
+      <a class="dicon" style={`--i:${projects.length + 1}`} href={profile.github} rel="noopener"><span class="tile t-gh"><svg viewBox="0 0 24 24"><path d={I.gh} /></svg></span>GitHub</a>
+      <a class="dicon" style={`--i:${projects.length + 2}`} href={profile.hub}><span class="tile t-about"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10" /></svg></span>All portfolios</a>
     </nav>
 
     <main class="stage" id="stage">
@@ -83,7 +86,7 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
         <div class="body" style="overflow:hidden"><div class="term" data-term={payload}>
           <div class="tlog" id="tlog" data-lenis-prevent role="log" aria-live="polite"></div>
           <form class="tform" id="tform" autocomplete="off"><label class="sr" for="tin">Terminal command</label><span class="tps">stephen<i>@</i>desktop <u>~</u> $</span><input class="tin" id="tin" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" /><span class="tghost" id="tghost" aria-hidden="true"></span></form>
-          <div class="tchips">{['help', 'whoami', 'about', 'apps', 'stack', 'contact', 'open comic-studio', 'open gitdesk', 'open lantern', 'open yaymal', 'clear'].map((c) => <button type="button" class="tchip" data-cmd={c}>{c}</button>)}</div>
+          <div class="tchips">{['help', 'whoami', 'about', 'apps', 'stack', 'contact', 'why', 'open notes', 'open comic-studio', 'open gitdesk', 'open lantern', 'open yaymal', 'clear'].map((c) => <button type="button" class="tchip" data-cmd={c}>{c}</button>)}</div>
         </div></div>
       </section>
 
@@ -91,21 +94,40 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
       <section class="win" id="w-store" data-w="store" aria-label="App Store" style="left:20vw;bottom:13vh;width:min(780px,58vw);height:min(400px,40vh)">
         <div class="tb"><span class="tl"><button class="c" data-g="×" aria-label="Close"></button><button class="n" data-g="−" aria-label="Minimize"></button><button class="x" data-g="+" aria-label="Maximize"></button></span><span class="ttl">App Store</span></div>
         <div class="body"><div class="store">
-          <aside><h3>Discover</h3><button class="on" data-tab="overview">Featured</button><button data-tab="news">What’s new</button><button data-tab="road">Roadmap</button><h3>Library</h3><button data-tab="req">Requirements</button></aside>
-          <div class="pane">
+          <aside><h3>Apps</h3>{projects.map((p, i) => <button class={i === 0 ? 'on' : ''} data-app={p.slug}><span class="mini" style={`background:${p.tint}`}><AppIcon d={p.icon} /></span>{p.name}</button>)}<h3>Details</h3><button class="on" data-tab="overview">Overview</button><button data-tab="news">What’s new</button><button data-tab="road">Roadmap</button><button data-tab="req">Requirements</button></aside>
+          <div class="pane">{projects.map((app, ai) => (
+            <div data-appv={app.slug} hidden={ai !== 0}>
             <div data-pane="overview">
               <div class="hero2"><span class="chip pk">{app.status}</span><div class="big">{app.name}</div><p>{app.summary}</p>
                 <ol class="pipe">{app.pipeline!.map((s) => <li>{s}</li>)}</ol>
                 <div class="row"><span class="btn off" aria-disabled="true">Get · coming with {app.roadmap.at(-1)?.id}</span><a class="btn ghost" href={`${base}/apps/${app.slug}/`}>Open app page →</a>{app.repo && <a class="btn ghost" href={app.repo} rel="noopener">Source</a>}</div>
               </div>
-              <div class="facts" style="margin-top:14px"><div><small>Version</small><b>{app.version}</b></div><div><small>Updated</small><b>{app.updated}</b></div><div><small>Platforms</small><b>{app.platforms.join(' · ')}</b></div><div><small>Price</small><b>Free</b></div></div>
+              <div class="facts" style="margin-top:14px"><div><small>Version</small><b>{app.version}</b></div><div><small>Updated</small><b>{app.updated}</b></div><div><small>Platforms</small><b>{app.platforms.join(' · ')}</b></div><div><small>{app.size ? 'Size' : 'Price'}</small><b>{app.size ?? 'Free'}</b></div></div>
+              <p class="story1">{app.story[0]}</p>
               <ul class="feat">{app.features.slice(0, 4).map((f) => <li>{f}</li>)}</ul>
             </div>
             <div data-pane="news" hidden>{app.releases.map((r) => <div class="rel"><div class="h"><b>v{r.version}</b><time>{r.date}</time></div><h4>{r.title}</h4><ul>{r.notes.map((n) => <li>• {n}</li>)}</ul></div>)}</div>
-            <div data-pane="road" hidden>{app.roadmap.map((m, i) => <div class="ms"><b>{m.id}</b><span>{m.title}</span><div class="bar"><i data-w={i === 0 ? 12 : 0}></i></div></div>)}<p style="margin-top:12px;color:var(--soft);font-size:13px">Design docs and a Library prototype are done; M0 spikes come first.</p></div>
+            <div data-pane="road" hidden>{app.roadmap.map((m, i) => <div class="ms"><b>{m.id}</b><span>{m.title}</span><div class="bar"><i data-w={i === 0 ? 12 : 0}></i></div></div>)}<p style="margin-top:12px;color:var(--soft);font-size:13px">Next up: {app.roadmap[0].items.join(', ').toLowerCase()}.</p></div>
             <div data-pane="req" hidden><div class="facts" style="grid-template-columns:1fr"><div><small>Operating system</small><b>{app.requirements.os.join(' · ')}</b></div><div><small>Hardware</small><b>{app.requirements.hardware.join(' · ')}</b></div><div><small>Also needed</small><b>{app.requirements.software.join(' · ')}</b></div></div></div>
-          </div>
+            </div>
+          ))}</div>
         </div></div>
+      </section>
+
+      <!-- NOTES -->
+      <section class="win" id="w-notes" data-w="notes" aria-label="Why desktop" style="left:8vw;top:10vh;width:min(580px,46vw);height:min(560px,66vh)">
+        <div class="tb"><span class="tl"><button class="c" data-g="×" aria-label="Close"></button><button class="n" data-g="−" aria-label="Minimize"></button><button class="x" data-g="+" aria-label="Maximize"></button></span><span class="ttl">Why desktop.md</span></div>
+        <div class="body"><article class="notes">
+          <p class="mono kicker"># why-desktop.md</p>
+          <h2>Why I build desktop apps</h2>
+          <p class="lead">{approach.intro}</p>
+          <ol class="pr">{approach.principles.map((p, i) => <li><b class="mono">0{i + 1}</b><div><h3>{p.title}</h3><p>{p.body}</p></div></li>)}</ol>
+          <h3 class="sub">How each app is put together</h3>
+          <ol class="pipe">{approach.build.map((s) => <li>{s}</li>)}</ol>
+          <p>{approach.buildNote}</p>
+          <h3 class="sub">On the desk right now</h3>
+          <ul class="now">{projects.map((p) => <li><a href={`${base}/apps/${p.slug}/`}><span class="mini" style={`background:${p.tint}`}><AppIcon d={p.icon} /></span><span><b>{p.name}</b><small>{p.status} · {p.platforms.join(', ')}</small></span></a></li>)}</ul>
+        </article></div>
       </section>
 
       <!-- SETTINGS -->
@@ -125,7 +147,7 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
     <nav class="dock" id="dock" aria-label="Dock">
       {wins.map((w) => <button class="dk" data-open={w.id} data-tip={w.dock} aria-label={`Open ${w.dock}`}><span class={`tile ${w.cls}`}><svg viewBox="0 0 24 24"><path d={I[w.icon as keyof typeof I]} /></svg></span><i class="dot"></i></button>)}
       <i class="sep" aria-hidden="true"></i>
-      {projects.map((p) => <a class="dk" href={`${base}/apps/${p.slug}/`} data-tip={p.name} aria-label={p.name}><span class="tile t-app">{p.glyph}</span></a>)}
+      {projects.map((p) => <a class="dk" href={`${base}/apps/${p.slug}/`} data-tip={p.name} aria-label={p.name}><span class="tile" style={`background:${p.tint}`}><AppIcon d={p.icon} /></span></a>)}
     </nav>
 
     <script>
@@ -134,17 +156,18 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       const small = () => matchMedia('(max-width: 820px)').matches;
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-      const names: Record<string, string> = { about: 'About', term: 'Terminal', store: 'App Store', set: 'Settings', mail: 'Mail' };
+      const store = { get: (k: string) => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { sessionStorage.setItem(k, v); } catch {} } };
+      const names: Record<string, string> = { about: 'About', notes: 'TextEdit', term: 'Terminal', store: 'App Store', set: 'Settings', mail: 'Mail' };
 
       // ---------- boot ----------
       async function boot() {
         const el = $('#boot');
-        const seen = sessionStorage.getItem('booted');
+        const seen = store.get('booted');
         if (seen || reduce) { el.classList.add('gone'); return; }
         const msgs = ['starting StephenOS…', 'loading local models…', 'mounting apps…', 'welcome'];
         const bar = $('#bootpg'); const nm = $('#bootnm');
         for (let i = 0; i < msgs.length; i++) { nm.textContent = msgs[i]; bar.style.width = `${((i + 1) / msgs.length) * 100}%`; bar.style.transition = 'width .6s'; await sleep(560); }
-        sessionStorage.setItem('booted', '1');
+        store.set('booted', '1');
         el.classList.add('gone');
       }
 
@@ -158,9 +181,12 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
         w.style.zIndex = String(++z);
         $('#appname').textContent = names[w.dataset.w!] ?? 'Finder';
       }
-      function open(id: string) {
+      function open(id: string, retile = true) {
         const w = byId(id);
         const d = dk(id);
+        const shown = w.classList.contains('open') && !w.classList.contains('min');
+        if (!order.includes(id)) order.push(id);
+        if (!shown && retile) tile(id);
         w.classList.remove('min');
         if (!w.classList.contains('open')) {
           w.classList.add('open');
@@ -170,13 +196,14 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
         focus(w);
         if (id === 'term') setTimeout(() => ($('#tin') as HTMLInputElement).focus({ preventScroll: true }), 50);
         if (id === 'store') growBars();
-        if (small()) wins.forEach((x) => { if (x !== w) { x.classList.remove('open'); } });
+        if (small()) wins.forEach((x) => { if (x !== w && x.classList.contains('open')) close(x); });
       }
-      function close(w: HTMLElement) { w.classList.remove('open', 'active', 'max'); dk(w.dataset.w!).classList.remove('run'); }
+      function close(w: HTMLElement) { w.classList.remove('open', 'active', 'max', 'min'); dk(w.dataset.w!).classList.remove('run'); if (!$('.win.active')) $('#appname').textContent = 'Finder'; order = order.filter((x) => x !== w.dataset.w); tile(); }
       function minimize(w: HTMLElement) {
         const d = dk(w.dataset.w!).getBoundingClientRect(); const r = w.getBoundingClientRect();
         w.style.transformOrigin = `${d.left + d.width / 2 - r.left}px ${d.top - r.top}px`;
-        w.classList.add('min'); w.classList.remove('active');
+        w.classList.add('min'); w.classList.remove('active'); if (!$('.win.active')) $('#appname').textContent = 'Finder';
+        order = order.filter((x) => x !== w.dataset.w); tile();
       }
       wins.forEach((w) => {
         w.addEventListener('pointerdown', () => focus(w));
@@ -215,15 +242,15 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
       let pop: HTMLElement | null = null;
       const closePop = () => { pop?.remove(); pop = null; $$('[aria-expanded]').forEach((b) => b.setAttribute('aria-expanded', 'false')); };
       const menus: Record<string, [string, string?][]> = {
-        file: [['Open About', 'about'], ['Open Terminal', 'term'], ['Open App Store', 'store'], ['Open Settings', 'set'], ['New message', 'mail']],
+        file: [['Open About', 'about'], ['Open Why desktop.md', 'notes'], ['Open Terminal', 'term'], ['Open App Store', 'store'], ['Open Settings', 'set'], ['New message', 'mail']],
         view: [['Tidy windows', '@tidy'], ['Close all', '@closeall']],
-        win: [['About', 'about'], ['Terminal', 'term'], ['App Store', 'store'], ['Settings', 'set'], ['Mail', 'mail']],
-        help: [['Try the Terminal: type “help”', 'term']],
+        win: [['About', 'about'], ['Why desktop.md', 'notes'], ['Terminal', 'term'], ['App Store', 'store'], ['Settings', 'set'], ['Mail', 'mail']],
+        help: [['Why desktop apps?', 'notes'], ['Try the Terminal: type “help”', 'term']],
       };
       function showMenu(btn: HTMLElement, key: string) {
         closePop(); const r = btn.getBoundingClientRect(); btn.setAttribute('aria-expanded', 'true');
         pop = document.createElement('div'); pop.className = 'menu-pop'; pop.style.left = `${r.left}px`; pop.style.top = `${r.bottom + 4}px`;
-        const items = key === 'apple' ? [['About this desktop', 'about'], ['App Store', 'store']] : menus[key];
+        const items = key === 'apple' ? [['About this desktop', 'about'], ['Why desktop apps?', 'notes'], ['App Store', 'store']] : menus[key];
         (items as [string, string][]).forEach(([label, act]) => { const b = document.createElement('button'); b.textContent = label; b.addEventListener('click', () => { closePop(); run(act); }); pop!.append(b); });
         document.body.append(pop);
       }
@@ -236,13 +263,42 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
       $('#apple').addEventListener('click', (e) => { e.stopPropagation(); showMenu($('#apple'), 'apple'); });
       document.addEventListener('click', closePop); addEventListener('keydown', (e) => e.key === 'Escape' && closePop());
 
-      // ---------- initial layout: windows fly open one after another ----------
-      function layout() { wins.forEach((w) => { w.style.left = w.style.right = w.style.top = w.style.bottom = ''; }); wins.forEach((w) => w.removeAttribute('style')); applyStart(); }
-      const start: Record<string, string> = {
-        about: 'left:3vw;top:5vh;width:min(480px,38vw)', term: 'right:10vw;top:7vh;width:min(560px,42vw);height:min(420px,52vh)',
-        store: 'left:20vw;bottom:13vh;width:min(780px,58vw);height:min(400px,40vh)', set: 'right:6vw;bottom:13vh;width:min(520px,40vw);height:min(420px,50vh)', mail: 'left:28vw;top:16vh;width:min(480px,40vw)',
-      };
-      function applyStart() { wins.forEach((w) => { w.style.cssText = start[w.dataset.w!]; if (w.classList.contains('open')) w.style.zIndex = String(++z); }); }
+      // ---------- tiling: open windows share the desktop in a grid and never overlap ----------
+      let order: string[] = [];
+      const shownIds = () => order.filter((id) => { const w = byId(id); return w.classList.contains('open') && !w.classList.contains('min'); });
+      // ids: windows to lay out (default: the visible ones); fresh: a window about to appear, placed without sliding
+      function tile(fresh?: string, ids = shownIds()) {
+        if (small()) return;
+        if (fresh && !ids.includes(fresh)) ids = [...ids, fresh];
+        const n = ids.length; if (!n) return;
+        // gap between windows and around the edges, like a tiling window manager
+        const g = 8; const pad = g;
+        // the area between the menu bar, the desktop icons and the dock
+        const iconLeft = Math.min(...$$('.dicon').map((d) => d.getBoundingClientRect().left));
+        const W = Math.min(iconLeft - g, innerWidth - pad) - pad;
+        const H = innerHeight - 34 - $('#dock').offsetHeight - 12 - 2 * g;
+        const bw = Math.min(W, n === 1 ? 760 : 1320); const bh = Math.min(H, n === 1 ? 620 : 760);
+        // anchored to the top-left corner; any spare room stays on the right
+        const x0 = pad; const y0 = g;
+        let rects: number[][] = [];
+        if (n === 3) {
+          // one tall window on the left, two stacked on the right
+          const aw = Math.round(Math.min(480, Math.max(340, bw * 0.38))); const th = Math.round((bh - g) * 0.46);
+          rects = [[0, 0, aw, bh], [aw + g, 0, bw - aw - g, th], [aw + g, th + g, bw - aw - g, bh - th - g]];
+        } else {
+          const cols = n <= 2 ? n : n === 4 ? 2 : 3; const rows = Math.ceil(n / cols); const rh = (bh - g * (rows - 1)) / rows;
+          rects = ids.map((_, i) => { const r = Math.floor(i / cols); const inRow = r === rows - 1 ? n - cols * (rows - 1) : cols; const cw = (bw - g * (inRow - 1)) / inRow; return [(i % cols) * (cw + g), r * (rh + g), cw, rh]; });
+        }
+        ids.forEach((id, i) => {
+          const w = byId(id); const [l, t, ww, hh] = rects[i].map(Math.round); const zi = w.style.zIndex;
+          w.classList.remove('max');
+          if (id === fresh) w.style.transition = 'none';
+          w.style.cssText = `left:${x0 + l}px;top:${y0 + t}px;width:${ww}px;height:${hh}px;z-index:${zi}` + (id === fresh ? ';transition:none' : '');
+          if (id === fresh) { void w.offsetWidth; w.style.transition = ''; }
+        });
+      }
+      const layout = () => tile();
+      addEventListener('resize', () => tile());
 
       // ---------- about: typed tagline + count-up ----------
       function typeTagline() {
@@ -252,10 +308,11 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
       function countUp() { $$('[data-n]').forEach((el) => { const to = Number(el.dataset.n); if (reduce) { el.textContent = String(to); return; } const t0 = performance.now(); const f = (t: number) => { const k = Math.min(1, (t - t0) / 1200); el.textContent = String(Math.round(to * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }); }
 
       // ---------- store ----------
-      const tabs = $$('[data-tab]'); const panes = $$('[data-pane]');
+      const tabs = $$('[data-tab]'); const panes = $$('[data-pane]'); const appBtns = $$('[data-app]');
+      appBtns.forEach((b) => b.addEventListener('click', () => { appBtns.forEach((x) => x.classList.toggle('on', x === b)); $$('[data-appv]').forEach((v) => (v.hidden = v.dataset.appv !== b.dataset.app)); $('.store .pane').scrollTop = 0; growBars(); }));
       tabs.forEach((t) => t.addEventListener('click', () => { tabs.forEach((x) => x.classList.toggle('on', x === t)); panes.forEach((p) => (p.hidden = p.dataset.pane !== t.dataset.tab)); if (t.dataset.tab === 'road') growBars(); }));
       function growBars() { setTimeout(() => $$('.bar i').forEach((b) => (b.style.width = `${b.dataset.w}%`)), 200); }
-      $('#copy').addEventListener('click', (e) => { const b = e.currentTarget as HTMLElement; void navigator.clipboard?.writeText(b.dataset.v!); const o = b.textContent; b.textContent = 'Copied ✓'; setTimeout(() => (b.textContent = o), 1500); });
+      $('#copy').addEventListener('click', (e) => { const b = e.currentTarget as HTMLElement; const o = b.textContent; const say = (t: string) => { b.textContent = t; setTimeout(() => (b.textContent = o), 1500); }; (navigator.clipboard ? navigator.clipboard.writeText(b.dataset.v!) : Promise.reject()).then(() => say('Copied ✓'), () => say('Copy failed')); });
 
       // ---------- terminal ----------
       const data = JSON.parse($('[data-term]').dataset.term!) as { cmds: Record<string, string[]>; apps: string[]; base: string };
@@ -264,13 +321,13 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
       const line = (cls: string, html: string | Node) => { const d = document.createElement('div'); d.className = `tline ${cls}`; typeof html === 'string' ? (d.textContent = html) : d.append(html); log.append(d); log.scrollTop = log.scrollHeight; return d; };
       const paint = (t: string) => { const f = document.createElement('span'); const m = t.match(/^•\s([^:]{2,40}):\s(.*)$/); if (m) { f.innerHTML = '<b class="tp">• </b>'; const k = document.createElement('span'); k.className = 'tk'; k.textContent = m[1]; f.append(k, document.createTextNode(': ' + m[2])); return f; } const h = t.match(/^(\s{2})(\S+(?: \S+)?)(\s{2,})(.*)$/); if (h) { const a = document.createElement('span'); a.className = 'tg'; a.textContent = h[2]; const b = document.createElement('span'); b.className = 'td'; b.textContent = h[4]; f.append(document.createTextNode(h[1]), a, document.createTextNode(h[3]), b); return f; } if (/^Available/.test(t)) { f.className = 'th'; f.textContent = t; return f; } f.textContent = t; return f; };
       const out = (ls: string[]) => ls.forEach((l) => line('', l ? paint(l) : ' '));
-      const helpRows = [['whoami', 'who is this'], ['about', 'what I build'], ['apps', 'my apps'], ['stack', 'tools I use'], ['contact', 'get in touch'], ['open <app|window>', 'e.g. open comic-studio'], ['clear', 'clean the screen']];
+      const helpRows = [['whoami', 'who is this'], ['about', 'what I build'], ['why', 'why desktop apps'], ['apps', 'my apps'], ['stack', 'tools I use'], ['contact', 'get in touch'], ['open <app|window>', 'e.g. open comic-studio'], ['clear', 'clean the screen']];
       function exec(raw: string) {
         const c = raw.trim(); if (!c) return; const e = document.createElement('span'); e.innerHTML = '<b class="tp">$</b> '; e.append(document.createTextNode(c)); line('tc', e); hist.push(c); hi = hist.length;
         const [n, ...a] = c.toLowerCase().split(/\s+/);
         if (n === 'clear') { log.replaceChildren(); return; }
         if (n === 'help') { out(['Available commands:', ...helpRows.map(([x, y]) => `  ${x.padEnd(18)} ${y}`)]); return; }
-        if (n === 'open') { const t = a[0]; if (data.apps.includes(t)) { out([`Opening ${t}…`]); setTimeout(() => (location.href = `${data.base}/apps/${t}/`), 500); } else if (names[t] || ['about', 'term', 'terminal', 'store', 'set', 'settings', 'mail'].includes(t)) { const id = ({ terminal: 'term', settings: 'set' } as Record<string, string>)[t] ?? t; out([`Opening ${id}…`]); open(id); } else out([`open: "${a[0] ?? ''}" not found. Try: comic-studio, about, store, mail.`]); return; }
+        if (n === 'open') { const t = a[0]; if (data.apps.includes(t)) { out([`Opening ${t}…`]); setTimeout(() => (location.href = `${data.base}/apps/${t}/`), 500); } else if (names[t] || ['about', 'notes', 'term', 'terminal', 'store', 'set', 'settings', 'mail'].includes(t)) { const id = ({ terminal: 'term', settings: 'set' } as Record<string, string>)[t] ?? t; out([`Opening ${id}…`]); open(id); } else out([`open: "${a[0] ?? ''}" not found. Try: gitdesk, lantern, yaymal, notes, store.`]); return; }
         if (n === 'sudo' && a.join(' ').includes('hire')) { out(['[sudo] permission granted. Opening mail…']); open('mail'); return; }
         const r = data.cmds[n]; r ? out(r) : out([`command not found: ${n}. Type "help".`]);
       }
@@ -281,14 +338,17 @@ const done = (r: { id: string }) => (['M0', 'M1', 'M2', 'M3', 'M4', 'M5'].indexO
       $('.term').addEventListener('click', (e) => { if (!(e.target as HTMLElement).closest('a,button,input')) tin.focus({ preventScroll: true }); });
       async function typeRun(c: string) { for (const ch of c) { tin.value += ch; await sleep(reduce ? 0 : 55); } await sleep(reduce ? 0 : 200); tin.value = ''; exec(c); }
       const place = () => { const p = $('.tps'); ghost.style.left = `${p.offsetLeft + p.offsetWidth + 8}px`; };
-      async function idle() { let i = 0; for (;;) { await sleep(3000); if (tin.value || document.activeElement === tin && tin.value) continue; const c = ['about', 'apps', 'stack', 'open comic-studio'][i++ % 4]; place(); for (const ch of c) { if (tin.value) break; ghost.textContent += ch; await sleep(90); } await sleep(1000); while (ghost.textContent) { ghost.textContent = ghost.textContent.slice(0, -1); await sleep(40); } } }
+      async function idle() { let i = 0; for (;;) { await sleep(3000); if (tin.value || document.activeElement === tin && tin.value) continue; const c = ['about', 'why', 'apps', 'stack', 'open gitdesk'][i++ % 5]; place(); for (const ch of c) { if (tin.value) break; ghost.textContent += ch; await sleep(90); } await sleep(1000); while (ghost.textContent) { ghost.textContent = ghost.textContent.slice(0, -1); await sleep(40); } } }
 
       // ---------- go ----------
       (async () => {
         await boot();
         document.body.classList.add('os-on'); document.documentElement.classList.add('os-on');
-        const order = small() ? ['about'] : ['about', 'term', 'store'];
-        for (const id of order) { await sleep(reduce ? 0 : 420); open(id); if (id === 'about') { typeTagline(); countUp(); } }
+        // place all three first, then fade them in one by one, so nothing shuffles while they appear
+        const first = small() ? ['about'] : ['about', 'term', 'store'];
+        order = [...first]; tile(undefined, first);
+        await sleep(reduce ? 0 : 300);
+        for (const id of first) { open(id, false); if (id === 'about') { typeTagline(); countUp(); } await sleep(reduce ? 0 : 140); }
         focus(byId(small() ? 'about' : 'term'));
         if (!small()) { await sleep(500); await typeRun('whoami'); await sleep(300); await typeRun('help'); } else { ($('#tin') as HTMLInputElement).blur(); }
         place(); void idle();

@@ -1,0 +1,6 @@
+---
+// An app's line icon. The container decides size and background (the app's `tint`).
+interface Props { d: string; class?: string }
+const { d, class: cls } = Astro.props;
+---
+<svg class:list={['appicon', cls]} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={d} /></svg>

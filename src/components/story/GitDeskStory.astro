@@ -1,0 +1,109 @@
+---
+// GitDesk: technical style. A commit graph next to the intro, a four-step commit flow drawn as tiny UI
+// cards, then the "your git, not a copy of it" layer diagram.
+import type { App } from '../../data/content';
+interface Props { app: App }
+const { app } = Astro.props;
+const [p0, p1, p2] = app.story;
+
+// commit graph: main lane at x=18, feature lane at x=48
+const commits = [
+  { y: 16, lane: 0, msg: 'Fetch, pull and push', tag: 'v0.1.0' },
+  { y: 48, lane: 0, msg: 'Merge branch feature/history', merge: true },
+  { y: 80, lane: 1, msg: 'Load history 100 commits at a time' },
+  { y: 112, lane: 1, msg: 'Per-file diffs for old commits' },
+  { y: 144, lane: 0, msg: 'Branch picker with filter' },
+  { y: 176, lane: 0, msg: 'Changes view with checkboxes' },
+];
+const x = (lane: number) => (lane ? 48 : 18);
+const steps = [
+  { n: '01', t: 'See what changed', d: 'Every modified file, with a checkbox.' },
+  { n: '02', t: 'Read the diff', d: 'Line numbers and coloured hunks.' },
+  { n: '03', t: 'Commit what you picked', d: 'Unticked files stay where they are.' },
+  { n: '04', t: 'Push', d: 'One button, with ahead and behind counts.' },
+];
+---
+<div class="gd">
+  <div class="intro">
+    <p class="lead">{p0}</p>
+    <figure class="graph" aria-label="Example commit graph with a feature branch merged into main">
+      <div class="bar mono"><span>History</span><span class="br">⎇ main</span></div>
+      <svg viewBox="0 0 330 192" role="img" aria-hidden="true">
+        <path d="M18 16V176" class="lane0" />
+        <path d="M18 48C18 64 48 64 48 80V112C48 128 18 128 18 144" class="lane1" />
+        {commits.map((c) => (
+          <g>
+            <circle cx={x(c.lane)} cy={c.y} r={c.merge ? 6 : 5} class={c.lane ? 'dot1' : 'dot0'} />
+            <text x="72" y={c.y + 4} class="msg">{c.msg}</text>
+            {c.tag && <g><rect x="276" y={c.y - 8} width="48" height="16" rx="8" class="tag" /><text x="300" y={c.y + 4} class="tagt">{c.tag}</text></g>}
+          </g>
+        ))}
+      </svg>
+    </figure>
+  </div>
+
+  <ol class="flow">
+    {steps.map((s, i) => (
+      <li>
+        <div class="ui" aria-hidden="true">
+          {i === 0 && <ul class="files mono"><li><i class="ck on"></i>src/diff.rs<b class="m">M</b></li><li><i class="ck on"></i>ui/Changes.tsx<b class="m">M</b></li><li><i class="ck"></i>notes.md<b class="a">A</b></li></ul>}
+          {i === 1 && <div class="diff mono"><div class="ln d"><span>12</span>- let n = 50;</div><div class="ln a"><span>12</span>+ let n = 100;</div><div class="ln"><span>13</span>  load(n)</div></div>}
+          {i === 2 && <div class="cm"><div class="in">Load more history</div><div class="go">Commit 2 files to main</div></div>}
+          {i === 3 && <div class="push mono"><span>↑ 1</span><span>↓ 0</span><b>Push origin</b></div>}
+        </div>
+        <span class="n mono">{s.n}</span>
+        <h4>{s.t}</h4>
+        <p>{s.d}</p>
+      </li>
+    ))}
+  </ol>
+
+  <div class="layers">
+    <p>{p1}</p>
+    <div class="stack mono" aria-label="GitDesk UI talks to a Rust core, which runs your installed git">
+      <div class="l ui2">React UI <small>what you click</small></div>
+      <div class="arr">↓ typed Tauri commands</div>
+      <div class="l rs">Rust core <small>runs and parses</small></div>
+      <div class="arr">↓ spawns</div>
+      <div class="l git">your <b>git</b> on PATH</div>
+      <div class="keeps"><span>config</span><span>hooks</span><span>credential helper</span><span>SSH agent</span></div>
+    </div>
+  </div>
+  <p class="foot">{p2}</p>
+</div>
+
+<style>
+  .gd { display: grid; gap: 28px; }
+  .lead { font-size: 17.5px; line-height: 1.65; color: var(--fg); }
+  .intro { display: grid; gap: 18px; }
+  .graph { margin: 0; border-radius: 14px; border: 1px solid var(--border); background: #0b0e16; overflow: hidden; }
+  .graph .bar { display: flex; justify-content: space-between; padding: 9px 14px; font-size: 12px; color: var(--faint); border-bottom: 1px solid var(--hair); background: rgba(255,255,255,.03); }
+  .graph .br { color: #fdba74; }
+  .graph svg { display: block; width: 100%; height: auto; padding: 8px 6px 4px; }
+  .lane0 { stroke: #fb923c; stroke-width: 2.5; fill: none; } .lane1 { stroke: #a78bfa; stroke-width: 2.5; fill: none; }
+  .dot0 { fill: #0b0e16; stroke: #fb923c; stroke-width: 2.5; } .dot1 { fill: #0b0e16; stroke: #a78bfa; stroke-width: 2.5; }
+  .msg { fill: #cbd5e1; font: 11px var(--mono); }
+  .tag { fill: rgba(251,146,60,.16); stroke: rgba(251,146,60,.6); } .tagt { fill: #fdba74; font: 600 9.5px var(--mono); text-anchor: middle; }
+
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; counter-reset: s; }
+  .flow > li { position: relative; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: rgba(255,255,255,.035); }
+  .flow > li:not(:last-child)::after { content: '→'; position: absolute; right: -9px; top: 42px; z-index: 1; color: #fb923c; font-size: 13px; }
+  .flow .n { font-size: 11px; color: #fb923c; } .flow h4 { margin: 2px 0 2px; font-size: 14px; } .flow p { font-size: 12.5px; color: var(--dim); line-height: 1.45; }
+  .ui { height: 66px; margin-bottom: 10px; border-radius: 9px; background: #0b0e16; border: 1px solid var(--hair); padding: 7px; overflow: hidden; font-size: 10px; }
+  .files li { display: flex; align-items: center; gap: 6px; padding: 1.5px 0; color: #cbd5e1; } .ck { width: 9px; height: 9px; border-radius: 2px; border: 1px solid #64748b; flex: none; } .ck.on { background: #fb923c; border-color: #fb923c; }
+  .files b { margin-left: auto; font-weight: 600; } .files .m { color: #fbbf24; } .files .a { color: #4ade80; }
+  .diff .ln { display: flex; gap: 6px; padding: 2px 4px; border-radius: 3px; color: #94a3b8; white-space: nowrap; } .diff span { color: #475569; } .diff .d { background: rgba(244,63,94,.16); color: #fda4af; } .diff .a { background: rgba(74,222,128,.14); color: #86efac; }
+  .cm { display: grid; gap: 6px; } .cm .in { padding: 5px 7px; border-radius: 5px; border: 1px solid #334155; color: #e2e8f0; font-size: 10.5px; } .cm .go { padding: 5px 7px; border-radius: 5px; background: linear-gradient(90deg, #fb923c, #e11d48); color: #fff; font-weight: 600; text-align: center; }
+  .push { display: flex; align-items: center; gap: 8px; height: 100%; color: #cbd5e1; } .push b { margin-left: auto; padding: 6px 9px; border-radius: 6px; background: rgba(251,146,60,.18); color: #fdba74; font-weight: 600; }
+
+  .layers { display: grid; gap: 16px; } .layers p { color: var(--dim); line-height: 1.7; }
+  .stack { display: grid; justify-items: center; gap: 4px; padding: 18px; border-radius: 16px; border: 1px dashed rgba(251,146,60,.35); background: radial-gradient(80% 100% at 50% 0%, rgba(251,146,60,.08), transparent); font-size: 13px; }
+  .stack .l { width: min(300px, 100%); padding: 10px 14px; border-radius: 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .stack small { color: var(--faint); font-size: 11px; }
+  .ui2 { background: rgba(96,165,250,.12); border: 1px solid rgba(96,165,250,.35); } .rs { background: rgba(251,146,60,.14); border: 1px solid rgba(251,146,60,.4); } .git { background: rgba(255,255,255,.06); border: 1px solid var(--border); justify-content: center !important; }
+  .arr { color: var(--faint); font-size: 11px; }
+  .keeps { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; } .keeps span { padding: 3px 9px; border-radius: 999px; font-size: 11px; color: #86efac; border: 1px solid rgba(74,222,128,.3); background: rgba(74,222,128,.08); } .keeps span::before { content: '✓ '; }
+  .foot { color: var(--dim); line-height: 1.7; }
+  @media (max-width: 640px) { .flow > li::after { display: none; } }
+  @media (min-width: 1180px) { .intro { grid-template-columns: 1fr 1fr; align-items: center; } .layers { grid-template-columns: 1fr 1fr; align-items: center; } }
+</style>
