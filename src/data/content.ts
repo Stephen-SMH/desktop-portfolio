@@ -159,11 +159,50 @@ export const projects: App[] = [
       { id: 'M4', title: 'Release', items: ['Signed and notarised builds with auto-update', 'CI builds for Windows and Linux', 'itch.io page'] },
     ],
   },
+  {
+    slug: 'yaymal',
+    name: 'YayMal',
+    glyph: 'Y',
+    summary:
+      'A local-first word processor modelled on Microsoft Word, and the first app in my YoneTone office suite. A full ribbon, real pages and Print Layout, templates, a self-updating table of contents and Word shortcuts. It opens and saves real .docx files, so documents move freely between YayMal, Word, Google Docs, Pages and LibreOffice. Your files never leave your machine.',
+    status: 'In progress',
+    platforms: ['macOS'],
+    stack: ['Tauri 2', 'React', 'TypeScript', 'TipTap / ProseMirror', 'FastAPI', 'python-docx', 'Expo'],
+    pipeline: ['Write', 'Format', 'Paginate', '.docx', 'Share'],
+    version: '0.1.0',
+    released: 'Oct 12, 2026',
+    updated: 'Oct 12, 2026',
+    license: 'Private repository',
+    size: '17 MB (.dmg)',
+    features: [
+      'A Word-style ribbon: Home, Insert, Layout, References, Review and View, plus Table Layout when the cursor is in a table.',
+      'Print Layout with real pages: margins, orientation and paper sizes, with a draggable ruler and zoom from 10% to 500%.',
+      'Opens and saves .docx. Files YayMal saved reopen exactly as they were; files from Word are converted from the Word XML.',
+      'Styles gallery, tables, pictures, headers and footers, page numbers and a clickable table of contents.',
+      'A backstage File view with templates (resume, letter, report, meeting notes, MLA essay) and recent files.',
+      'Spell check, word count, Read Aloud, Read Mode and dark mode.',
+      'Asks before you lose changes and keeps a crash-recovery copy. Also runs in the browser and as an Expo phone app.',
+    ],
+    requirements: {
+      os: ['macOS 11+ on Apple Silicon (M1 or later)'],
+      hardware: ['Any Apple Silicon Mac'],
+      software: ['Nothing else: the .docx service is bundled inside the app'],
+    },
+    releases: [
+      { version: '0.1.0', date: 'Oct 12, 2026', title: 'Working editor and installable app', notes: ['Ribbon, backstage, dialogs, real pages and Word keyboard shortcuts.', 'Lossless .docx round-trip through a bundled FastAPI service, with backend tests.', 'Installable .dmg with the Python service frozen inside, plus browser and Expo mobile builds.'] },
+    ],
+    roadmap: [
+      { id: 'M1', title: 'Closer to Word', items: ['Comments and track changes', 'Footnotes and section breaks', 'Different first-page headers and footers'] },
+      { id: 'M2', title: 'Layout', items: ['Split long paragraphs and tables across pages', 'Multi-column layout and text boxes', 'Equations'] },
+      { id: 'M3', title: 'YoneTone suite', items: ['A spreadsheet and a slides app on the same shell', 'Shared file browser and recent files', 'One installer for the suite'] },
+      { id: 'M4', title: 'Release', items: ['Signed and notarised builds with auto-update', 'Intel Mac, Windows and Linux builds', 'Native PDF export'] },
+    ],
+  },
 ];
 
 export const skills = [
   { group: 'Shell', items: ['Tauri 2', 'Rust', 'Electron', 'Flutter desktop'] },
-  { group: 'UI', items: ['TypeScript', 'React', 'Tailwind', 'Canvas 2D'] },
+  { group: 'UI', items: ['TypeScript', 'React', 'Tailwind', 'Canvas 2D', 'TipTap / ProseMirror'] },
   { group: 'Local AI', items: ['LM Studio', 'Ollama', 'ComfyUI', 'OpenAI-compatible APIs'] },
   { group: 'Shipping', items: ['Code signing', 'Auto-update', 'GitHub Actions'] },
 ];
