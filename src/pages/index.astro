@@ -2,6 +2,7 @@
 import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
 import '../styles/os.css';
+import Analytics from '../components/Analytics.astro';
 import AppIcon from '../components/AppIcon.astro';
 import { approach, profile, projects, skills } from '../data/content';
 
@@ -41,6 +42,7 @@ const payload = JSON.stringify({ cmds, apps: projects.map((p) => p.slug), base }
     <title>{profile.name} — Desktop Software</title>
     <meta name="description" content={profile.tagline} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <Analytics />
   </head>
   <body>
     <div class="boot" id="boot" aria-hidden="true"><div class="in"><div class="lg">✦</div><div class="nm" id="bootnm">StephenOS</div><div class="pg"><i id="bootpg"></i></div></div></div>

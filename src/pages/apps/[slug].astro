@@ -2,6 +2,7 @@
 import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
 import '../../styles/global.css';
+import Analytics from '../../components/Analytics.astro';
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import AppIcon from '../../components/AppIcon.astro';
@@ -44,6 +45,7 @@ const channels = [
     <title>{app.name} — {profile.name}</title>
     <meta name="description" content={app.summary} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <Analytics />
   </head>
   <body>
     <a class="skip" href="#feed">Skip to content</a>
